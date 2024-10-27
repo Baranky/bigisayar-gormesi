@@ -1,61 +1,29 @@
-import cv2
 import numpy as np
-import requests
-from ultralytics import YOLO
+import cv2
+from matplotlib import pyplot as plt
 
-# YOLOv8 modelini yükle
-model = YOLO('yolov8n.pt')
+class EdgeDetector:
+    def __init__(self):
+        # Yatay ve dikey kenar tespiti için filtreler
+        self.horizontal_filter = np.array([[-1, 1]])
+        self.vertical_filter = np.array([[-1], [1]])
 
+    def apply_filters(self, gray_image):
+        # Filtreleri uygulayıp sonuçları topluyoruz
+        horizontal_edges = cv2.filter2D(gray_image, -1, self.horizontal_filter)
+        vertical_edges = cv2.filter2D(gray_image, -1, self.vertical_filter)
+        return horizontal_edges + vertical_edges
 
-# URL'den profil resmini indirip inceleyen fonksiyon
-def analyze_profile_image(profile_url):
-    try:
-        # URL'den profil resmini çek
-        profile_image_url = f"{profile_url}/picture?type=large"
-        response = requests.get(profile_image_url, stream=True)
+#PNG dosyasını oku ve gri tonlamaya çevir
+image_path = "ornek.png"
+gray_image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-        if response.status_code == 200:
-            img_data = response.content
-            img_array = np.frombuffer(img_data, np.uint8)
-            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+# Kenar tespiti yap
+edge_detector = EdgeDetector()
+edges = edge_detector.apply_filters(gray_image)
 
-            if img is None:
-                return "Resim yüklenemedi"
-
-            # YOLO ile insan olup olmadığını kontrol et
-            results = model(img)
-            confidence_threshold = 0.5  # Minimum güven eşiği
-
-            # İnsan tespit etme
-            for result in results:
-                class_ids = result.boxes.cls
-                confidences = result.boxes.conf
-                for class_id, confidence in zip(class_ids, confidences):
-                    if model.names[int(class_id)] == 'person' and confidence > confidence_threshold:
-                        return f"İNSAN (Güven: {confidence:.2f})"
-            return "BASKA BİR VARLIK"
-        else:
-            return "Resim indirilemedi"
-    except Exception as e:
-        return f"Hata: {str(e)}"
-
-
-# Facebook profil URL'lerini listele
-profile_urls = [
-    "https://cdn1.ntv.com.tr/gorsel/qH05QRSOgEG_NIDTii5D2Q.jpg?width=660&mode=both&scale=both",
-    "https://cdn1.ntv.com.tr/gorsel/CckH_t_YcU2zOMXnpp8U_g.jpg?width=660&height=495&mode=both&scale=both",
-    "https://cdn.ntvspor.net/28f83cc79dfa452da774ff654f761d6c.jpg?mode=crop&w=940&h=626",
-    "https://cdn.ntvspor.net/047f56659f2748cf92bd636a135dd39d.jpg?w=660",
-    "https://cdn.ntvspor.net/c3f41736a032476a9d9add4bb8790730.jpg?w=660",
-    "https://cdn.ntvspor.net/c0619f36e26f430d9fece89c4defe2c0.jpg?mode=crop&w=940&h=626",
-    "https://cdn.ntvspor.net/db5ee47cfe55410ab3b5186443333d8c.jpg?mode=crop&w=940&h=626",
-    "https://cdn.ntvspor.net/18e65fa3d7594c318289e1520cc6800d.jpg?mode=crop&w=940&h=626",
-    "https://cdn.ntvspor.net/eccb91fc3df34887979a8491fe4d77e2.jpg?mode=crop&w=940&h=626",
-    "http://cdn.ntvspor.net/c5a11cdab4c846938f91d673cdcf5857.jpg?mode=crop&w=940&h=626",
-    ]
-
-
-# Her profil için analiz yap
-for url in profile_urls:
-    result = analyze_profile_image(url)
-    print(f"{url}: {result}")
+# Sonucu görselleştir
+plt.imshow(edges, cmap='gray')
+plt.title("Kenar Tespit Sonucu")
+plt.axis("off")
+plt.show()
