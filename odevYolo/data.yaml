@@ -1,0 +1,17 @@
+# train, val, test paths are relative to data dir
+train: C:/Users/baran/projeler/pycharmProject/finalOdev/dataset/train/images
+val: C:/Users/baran/projeler/pycharmProject/finalOdev/dataset/valid/images
+test: C:/Users/baran/projeler/pycharmProject/finalOdev/dataset/test/images
+# number of classes
+
+
+
+nc: 1
+names: ['kulaklik']
+
+roboflow:
+  workspace: baran-zxttz
+  project: kulaklik-rvexr
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/baran-zxttz/kulaklik-rvexr/dataset/1

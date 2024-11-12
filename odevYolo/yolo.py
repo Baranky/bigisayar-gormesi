@@ -3,6 +3,8 @@ from ultralytics import YOLO
 
 # YOLOv8 modelini yükle (nano model)
 model = YOLO('yolov8n.pt')  # YOLOv8 nano modeli
+model = YOLO('C:/Users/baran/runs/detect/train7/weights/best.pt')
+
 
 # Web kamerasını başlat (kamera ID'si 0 ile genellikle ilk kamera açılır)
 cap = cv2.VideoCapture(0)
